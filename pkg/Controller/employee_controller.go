@@ -21,9 +21,8 @@ type Employee struct {
 var db = con.CreateConn()
 
 func GetEmployees(c *gin.Context) {
-	query := "SELECT * FROM employee"
 
-	rows, err := db.Query(query)
+	rows, err := db.Query("SELECT * FROM employee")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -41,7 +40,7 @@ func GetEmployees(c *gin.Context) {
 		employees = append(employees, employee)
 	}
 
-	c.JSON(http.StatusOK, employees)
+	c.IndentedJSON(http.StatusOK, employees)
 }
 
 func GetEmployeesByID(c *gin.Context) {
@@ -49,11 +48,6 @@ func GetEmployeesByID(c *gin.Context) {
 	rows, _ := db.Query("SELECT * FROM employee where ID = ?", id)
 	var employee Employee
 	for rows.Next() {
-		// var ID int
-		// var Name string
-		// var Dept string
-		// var Title string
-		// var Comp string
 
 		rows.Scan(&employee.ID, &employee.Name, &employee.Dept, &employee.Title, &employee.Comp)
 
@@ -66,28 +60,6 @@ func GetEmployeesByID(c *gin.Context) {
 }
 
 func AddEmployee(c *gin.Context) {
-	// 	var employee Employee
-	// 	err := c.BindJSON(&employee)
-	// 	if err != nil {
-	// 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-	// 		return
-	// 	}
-
-	// 	result, err := db.Exec("INSERT INTO employee (ID, Name, Dept, Title, Comp) VALUES (?, ?, ?, ?, ?)", employee.ID, employee.Name, employee.Dept, employee.Title, employee.Comp)
-	// 	if err != nil {
-	// 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-	// 		return
-	// 	}
-
-	// 	id, err := result.LastInsertId()
-	// 	if err != nil {
-	// 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-	// 		return
-	// 	}
-
-	// 	employee.ID = string(rune(id))
-	// 	c.JSON(http.StatusCreated, employee)
-	// }
 
 	var employee Employee
 	if err := c.BindJSON(&employee); err != nil {
@@ -99,14 +71,10 @@ func AddEmployee(c *gin.Context) {
 		fmt.Print(err)
 	}
 
-	id, err := result.LastInsertId()
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
+	fmt.Print(result)
+	add := "ADDED!!!"
+	c.JSON(http.StatusCreated, add)
 
-	employee.ID = int(id)
-	c.JSON(http.StatusCreated, employee)
 }
 
 func UpdateEmployee(c *gin.Context) {
@@ -123,9 +91,7 @@ func UpdateEmployee(c *gin.Context) {
 		return
 	}
 
-	query := "UPDATE employee SET ID = ?,  Name = ?, Dept = ?, Title = ?, Comp = ? WHERE ID = ?"
-
-	result, err := db.Exec(query, employee.ID, employee.Name, employee.Dept, employee.Title, employee.Comp, id)
+	result, err := db.Exec("UPDATE employee SET ID = ?,  Name = ?, Dept = ?, Title = ?, Comp = ? WHERE ID = ?", employee.ID, employee.Name, employee.Dept, employee.Title, employee.Comp, id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -141,6 +107,9 @@ func UpdateEmployee(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{"error": "employee not found"})
 		return
 	}
+
+	update := "UPDATED!!!"
+	c.JSON(http.StatusCreated, update)
 
 	employee.ID = id
 	c.JSON(http.StatusOK, employee)
@@ -158,4 +127,6 @@ func DeleteEmployee(c *gin.Context) {
 		fmt.Print(err)
 	}
 	fmt.Print(result)
+	delete := "DELETED!!!"
+	c.JSON(http.StatusOK, delete)
 }
